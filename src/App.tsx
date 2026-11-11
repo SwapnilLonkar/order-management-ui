@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AuthProvider, useAuth } from './auth/AuthContext'
 import AuthPage from './pages/AuthPage'
 import CustomersPage from './pages/CustomersPage'
@@ -10,6 +10,13 @@ type Tab = 'products' | 'customers' | 'orders'
 function Shell() {
   const { username, role, logout } = useAuth()
   const [tab, setTab] = useState<Tab>('products')
+
+  // Every login starts on Products. Without this, the previous user's tab
+  // would carry over — e.g. a customer logging in after a seller would land
+  // on the Customers page even though their nav hides it.
+  useEffect(() => {
+    setTab('products')
+  }, [username])
 
   if (!username) {
     return <AuthPage />
@@ -54,7 +61,7 @@ function Shell() {
       </header>
       <main>
         {tab === 'products' && <ProductsPage />}
-        {tab === 'customers' && <CustomersPage />}
+        {tab === 'customers' && showCustomers && <CustomersPage />}
         {tab === 'orders' && <OrdersPage />}
       </main>
     </div>
