@@ -266,3 +266,19 @@ button.nav.active {
   background: #fee2e2;
   color: #991b1b;
 }
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.stepper button {
+  padding: 0.25rem 0.6rem;
+}
+
+.stepper .qty {
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: 700;
+}

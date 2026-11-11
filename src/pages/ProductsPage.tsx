@@ -21,11 +21,10 @@ const EMPTY: Product = {
 
 export default function ProductsPage() {
   const { role } = useAuth()
-  const { add } = useCart()
+  const { add, items, setQuantity } = useCart()
   const canManage = role === 'SELLER' || role === 'ADMIN'
   const canDelete = role === 'ADMIN'
   const canShop = role === 'CUSTOMER'
-  const [addedId, setAddedId] = useState<number | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [form, setForm] = useState<Product>(EMPTY)
   const [error, setError] = useState<string | null>(null)
@@ -161,7 +160,11 @@ export default function ProductsPage() {
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => (
+            {products.map((product) => {
+              const cartItem = items.find(
+                (item) => item.productId === product.id,
+              )
+              return (
               <tr key={product.id}>
                 <td>{product.id}</td>
                 <td>{product.name}</td>
@@ -191,24 +194,50 @@ export default function ProductsPage() {
                 )}
                 {canShop && (
                   <td>
-                    <button
-                      disabled={product.stockQuantity === 0}
-                      onClick={() => {
-                        add(product)
-                        setAddedId(product.id)
-                        window.setTimeout(() => setAddedId(null), 1200)
-                      }}
-                    >
-                      {product.stockQuantity === 0
-                        ? 'Out of stock'
-                        : addedId === product.id
-                          ? 'Added ✓'
+                    {cartItem ? (
+                      <div className="stepper">
+                        <button
+                          className="secondary"
+                          onClick={() =>
+                            setQuantity(
+                              cartItem.productId,
+                              cartItem.quantity - 1,
+                            )
+                          }
+                        >
+                          −
+                        </button>
+                        <span className="qty">{cartItem.quantity}</span>
+                        <button
+                          className="secondary"
+                          disabled={
+                            cartItem.quantity >= product.stockQuantity
+                          }
+                          onClick={() =>
+                            setQuantity(
+                              cartItem.productId,
+                              cartItem.quantity + 1,
+                            )
+                          }
+                        >
+                          +
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        disabled={product.stockQuantity === 0}
+                        onClick={() => add(product)}
+                      >
+                        {product.stockQuantity === 0
+                          ? 'Out of stock'
                           : 'Add to cart'}
-                    </button>
+                      </button>
+                    )}
                   </td>
                 )}
               </tr>
-            ))}
+              )
+            })}
             {products.length === 0 && (
               <tr>
                 <td colSpan={7} className="muted">
