@@ -64,10 +64,9 @@ function Shell() {
           )}
         </nav>
         <span className="user">{username}</span>
-          <button className="secondary" onClick={logout}>
-            Log out
-          </button>
-        </span>
+        <button className="secondary" onClick={logout}>
+          Log out
+        </button>
       </header>
       <main>
         {tab === 'products' && <ProductsPage />}
