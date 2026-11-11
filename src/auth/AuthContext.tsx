@@ -13,12 +13,13 @@ import {
   register as apiRegister,
   setToken,
 } from '../api/client'
+import type { Role } from '../api/types'
 
 interface AuthState {
   username: string | null
   role: string | null
   login: (username: string, password: string) => Promise<void>
-  register: (username: string, password: string) => Promise<void>
+  register: (username: string, password: string, role: Role) => Promise<void>
   logout: () => void
 }
 
@@ -44,8 +45,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   const register = useCallback(
-    async (username: string, password: string) => {
-      const response = await apiRegister(username, password)
+    async (username: string, password: string, role: Role) => {
+      const response = await apiRegister(username, password, role)
       applyToken(response.token)
     },
     [applyToken],

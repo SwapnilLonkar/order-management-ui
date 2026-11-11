@@ -4,6 +4,7 @@ import type {
   Order,
   Page,
   Product,
+  Role,
 } from './types'
 
 const API_BASE: string =
@@ -79,10 +80,11 @@ export function login(username: string, password: string): Promise<AuthResponse>
 export function register(
   username: string,
   password: string,
+  role: Role,
 ): Promise<AuthResponse> {
   return apiFetch<AuthResponse>('/api/auth/register', {
     method: 'POST',
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ username, password, role }),
   })
 }
 

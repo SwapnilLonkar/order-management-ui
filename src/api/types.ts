@@ -1,11 +1,15 @@
 // Types mirroring the backend DTOs in com.example.OMS.dto (order-management-api).
 
+export type Role = 'CUSTOMER' | 'SELLER' | 'ADMIN'
+
 export interface Product {
   id: number | null
   name: string
   description: string | null
   price: number
   stockQuantity: number
+  sellerId: number | null
+  sellerUsername: string | null
 }
 
 export interface Customer {
@@ -40,6 +44,8 @@ export interface OrderItem {
 export interface Order {
   id: number | null
   customerId: number
+  placedById: number | null
+  placedByUsername: string | null
   status: OrderStatus | null
   orderDate: string | null
   items: OrderItem[]

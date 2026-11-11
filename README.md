@@ -6,16 +6,25 @@ React + Vite + TypeScript frontend for the
 
 ## Features
 
+- **Three account types** — register as a **Customer** or a **Seller**
+  (Admins are created out-of-band). The UI adapts to the role in your JWT:
+  - *Customer*: browses all products, places orders, sees only their own
+    orders.
+  - *Seller*: manages only their own product catalog, sees incoming orders
+    containing their products (trimmed to their own items).
+  - *Admin*: sees and manages everything, including deletes.
 - **Login / Register** against `/api/auth` — the JWT is stored in
   `localStorage` and attached to every request as a Bearer token.
-- **Products** — list, create, edit, delete.
-- **Customers** — list, create, edit, delete.
-- **Orders** — list with per-order totals, create an order for a customer
-  with multiple product items, and move an order through its status flow
-  (PENDING → CONFIRMED → SHIPPED → DELIVERED / CANCELLED).
+- **Products** — list with the owning seller shown; create/edit for
+  sellers and admins.
+- **Customers** — recipient directory for sellers and admins.
+- **Orders** — list with per-order totals and color-coded status badges,
+  create an order with multiple product items, and move an order through
+  its status flow (PENDING → CONFIRMED → SHIPPED → DELIVERED / CANCELLED).
 
 Backend rules the UI respects: DELETE endpoints require an ADMIN role,
-and an order's status cannot change once it is DELIVERED or CANCELLED.
+sellers can only edit their own products, and an order's status cannot
+change once it is DELIVERED or CANCELLED.
 
 ## Running locally
 

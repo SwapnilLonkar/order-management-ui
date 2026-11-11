@@ -6,6 +6,7 @@ import {
   updateProduct,
 } from '../api/client'
 import type { Product } from '../api/types'
+import { useAuth } from '../auth/AuthContext'
 
 const EMPTY: Product = {
   id: null,
@@ -13,9 +14,14 @@ const EMPTY: Product = {
   description: '',
   price: 0,
   stockQuantity: 0,
+  sellerId: null,
+  sellerUsername: null,
 }
 
 export default function ProductsPage() {
+  const { role } = useAuth()
+  const canManage = role === 'SELLER' || role === 'ADMIN'
+  const canDelete = role === 'ADMIN'
   const [products, setProducts] = useState<Product[]>([])
   const [form, setForm] = useState<Product>(EMPTY)
   const [error, setError] = useState<string | null>(null)
@@ -69,7 +75,8 @@ export default function ProductsPage() {
 
   return (
     <section>
-      <h2>Products</h2>
+      <h2>{role === 'SELLER' ? 'My Products' : 'Products'}</h2>
+      {canManage && (
       <form className="panel" onSubmit={handleSubmit}>
         <div className="form-grid">
           <label>
@@ -130,6 +137,7 @@ export default function ProductsPage() {
           )}
         </div>
       </form>
+      )}
 
       {error && <div className="error">{error}</div>}
       {loading ? (
@@ -143,7 +151,8 @@ export default function ProductsPage() {
               <th>Description</th>
               <th>Price</th>
               <th>Stock</th>
-              <th></th>
+              <th>Seller</th>
+              {canManage && <th></th>}
             </tr>
           </thead>
           <tbody>
@@ -154,25 +163,32 @@ export default function ProductsPage() {
                 <td>{product.description}</td>
                 <td>${product.price.toFixed(2)}</td>
                 <td>{product.stockQuantity}</td>
-                <td className="row">
-                  <button
-                    className="secondary"
-                    onClick={() => setForm(product)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="danger"
-                    onClick={() => product.id && void handleDelete(product.id)}
-                  >
-                    Delete
-                  </button>
-                </td>
+                <td>{product.sellerUsername ?? '—'}</td>
+                {canManage && (
+                  <td className="row">
+                    <button
+                      className="secondary"
+                      onClick={() => setForm(product)}
+                    >
+                      Edit
+                    </button>
+                    {canDelete && (
+                      <button
+                        className="danger"
+                        onClick={() =>
+                          product.id && void handleDelete(product.id)
+                        }
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
             {products.length === 0 && (
               <tr>
-                <td colSpan={6} className="muted">
+                <td colSpan={7} className="muted">
                   No products yet.
                 </td>
               </tr>
@@ -180,7 +196,17 @@ export default function ProductsPage() {
           </tbody>
         </table>
       )}
-      <p className="muted">Deleting a product requires an ADMIN account.</p>
+      {role === 'SELLER' && (
+        <p className="muted">You only see and manage your own products.</p>
+      )}
+      {role === 'CUSTOMER' && (
+        <p className="muted">
+          Browsing as a customer — head to Orders to place an order.
+        </p>
+      )}
+      {role === 'ADMIN' && (
+        <p className="muted">Admins see every seller's products.</p>
+      )}
     </section>
   )
 }

@@ -15,6 +15,9 @@ function Shell() {
     return <AuthPage />
   }
 
+  // Customers (the recipient directory) is a back-office view for sellers and admins.
+  const showCustomers = role !== 'CUSTOMER'
+
   return (
     <div className="layout">
       <header>
@@ -26,12 +29,14 @@ function Shell() {
           >
             Products
           </button>
-          <button
-            className={tab === 'customers' ? 'nav active' : 'nav'}
-            onClick={() => setTab('customers')}
-          >
-            Customers
-          </button>
+          {showCustomers && (
+            <button
+              className={tab === 'customers' ? 'nav active' : 'nav'}
+              onClick={() => setTab('customers')}
+            >
+              Customers
+            </button>
+          )}
           <button
             className={tab === 'orders' ? 'nav active' : 'nav'}
             onClick={() => setTab('orders')}

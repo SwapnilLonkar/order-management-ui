@@ -13,6 +13,7 @@ import {
   type OrderItem,
   type Product,
 } from '../api/types'
+import { useAuth } from '../auth/AuthContext'
 
 interface ItemRow {
   productId: number
@@ -27,6 +28,8 @@ function orderTotal(order: Order): number {
 }
 
 export default function OrdersPage() {
+  const { role } = useAuth()
+  const canOrder = role === 'CUSTOMER' || role === 'ADMIN'
   const [orders, setOrders] = useState<Order[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -87,6 +90,8 @@ export default function OrdersPage() {
       await createOrder({
         id: null,
         customerId,
+        placedById: null,
+        placedByUsername: null,
         status: null,
         orderDate: null,
         items,
@@ -113,7 +118,17 @@ export default function OrdersPage() {
 
   return (
     <section>
-      <h2>Orders</h2>
+      <h2>{role === 'SELLER' ? 'Incoming Orders' : 'Orders'}</h2>
+      {role === 'SELLER' && (
+        <p className="muted">
+          Orders containing your products — you only see your own items in
+          each order.
+        </p>
+      )}
+      {role === 'CUSTOMER' && (
+        <p className="muted">Your orders.</p>
+      )}
+      {canOrder && (
       <form className="panel" onSubmit={handleCreate}>
         <div className="form-grid">
           <label>
@@ -195,6 +210,7 @@ export default function OrdersPage() {
           <button type="submit">Create order</button>
         </div>
       </form>
+      )}
 
       {error && <div className="error">{error}</div>}
       {loading ? (
@@ -205,6 +221,7 @@ export default function OrdersPage() {
             <tr>
               <th>ID</th>
               <th>Customer</th>
+              <th>Buyer</th>
               <th>Date</th>
               <th>Items</th>
               <th>Total</th>
@@ -216,6 +233,7 @@ export default function OrdersPage() {
               <tr key={order.id}>
                 <td>{order.id}</td>
                 <td>{customerName(order.customerId)}</td>
+                <td>{order.placedByUsername ?? '—'}</td>
                 <td>
                   {order.orderDate
                     ? new Date(order.orderDate).toLocaleString()
@@ -230,7 +248,12 @@ export default function OrdersPage() {
                   ))}
                 </td>
                 <td>${orderTotal(order).toFixed(2)}</td>
-                <td>
+                <td className="status-cell">
+                  <span
+                    className={`badge badge-${(order.status ?? 'PENDING').toLowerCase()}`}
+                  >
+                    {order.status ?? 'PENDING'}
+                  </span>
                   <select
                     value={order.status ?? 'PENDING'}
                     disabled={
@@ -252,7 +275,7 @@ export default function OrdersPage() {
             ))}
             {orders.length === 0 && (
               <tr>
-                <td colSpan={6} className="muted">
+                <td colSpan={7} className="muted">
                   No orders yet.
                 </td>
               </tr>
