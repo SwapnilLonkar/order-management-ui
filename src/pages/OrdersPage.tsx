@@ -32,6 +32,9 @@ export default function OrdersPage() {
   // Only admins place orders from this page (on behalf of a chosen
   // customer). Customers order through their cart, always for themselves.
   const isAdmin = role === 'ADMIN'
+  // Status changes belong to the seller fulfilling the order (or an admin).
+  // Customers only track the status — the API rejects their changes too.
+  const canEditStatus = role === 'SELLER' || role === 'ADMIN'
   const [orders, setOrders] = useState<Order[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -260,22 +263,24 @@ export default function OrdersPage() {
                   >
                     {order.status ?? 'PENDING'}
                   </span>
-                  <select
-                    value={order.status ?? 'PENDING'}
-                    disabled={
-                      order.status === 'DELIVERED' ||
-                      order.status === 'CANCELLED'
-                    }
-                    onChange={(e) =>
-                      void handleStatus(order, e.target.value)
-                    }
-                  >
-                    {ORDER_STATUSES.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
+                  {canEditStatus && (
+                    <select
+                      value={order.status ?? 'PENDING'}
+                      disabled={
+                        order.status === 'DELIVERED' ||
+                        order.status === 'CANCELLED'
+                      }
+                      onChange={(e) =>
+                        void handleStatus(order, e.target.value)
+                      }
+                    >
+                      {ORDER_STATUSES.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </td>
               </tr>
             ))}
@@ -289,10 +294,17 @@ export default function OrdersPage() {
           </tbody>
         </table>
       )}
-      <p className="muted">
-        Status cannot change once an order is DELIVERED or CANCELLED — the API
-        rejects it.
-      </p>
+      {role === 'CUSTOMER' ? (
+        <p className="muted">
+          The seller updates the status as your order is fulfilled — you
+          can't change it yourself.
+        </p>
+      ) : (
+        <p className="muted">
+          Status cannot change once an order is DELIVERED or CANCELLED — the
+          API rejects it.
+        </p>
+      )}
     </section>
   )
 }
