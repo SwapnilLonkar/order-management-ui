@@ -27,6 +27,7 @@ export default function ProductsPage() {
   const canShop = role === 'CUSTOMER'
   const [products, setProducts] = useState<Product[]>([])
   const [form, setForm] = useState<Product>(EMPTY)
+  const [editorOpen, setEditorOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -55,6 +56,7 @@ export default function ProductsPage() {
         await createProduct(form)
       }
       setForm(EMPTY)
+      setEditorOpen(false)
       await refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save product.')
@@ -80,69 +82,94 @@ export default function ProductsPage() {
     <section>
       <h2>{role === 'SELLER' ? 'My Products' : 'Products'}</h2>
       {canManage && (
-      <form className="panel" onSubmit={handleSubmit}>
-        <div className="form-grid">
-          <label>
-            Name
-            <input
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
-            />
-          </label>
-          <label>
-            Description
-            <input
-              value={form.description ?? ''}
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
-            />
-          </label>
-          <label>
-            Price
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={form.price}
-              onChange={(e) =>
-                setForm({ ...form, price: Number(e.target.value) })
-              }
-              required
-            />
-          </label>
-          <label>
-            Stock quantity
-            <input
-              type="number"
-              min="0"
-              value={form.stockQuantity}
-              onChange={(e) =>
-                setForm({ ...form, stockQuantity: Number(e.target.value) })
-              }
-              required
-            />
-          </label>
-        </div>
-        <div className="row">
-          <button type="submit">
-            {form.id ? 'Update product' : 'Add product'}
+        <div className="row" style={{ marginBottom: '1rem' }}>
+          <button
+            onClick={() => {
+              setForm(EMPTY)
+              setError(null)
+              setEditorOpen(true)
+            }}
+          >
+            Add product
           </button>
-          {form.id && (
-            <button
-              type="button"
-              className="secondary"
-              onClick={() => setForm(EMPTY)}
-            >
-              Cancel edit
-            </button>
-          )}
         </div>
-      </form>
+      )}
+      {canManage && editorOpen && (
+        <div
+          className="modal-backdrop"
+          onClick={() => setEditorOpen(false)}
+        >
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{form.id ? 'Edit product' : 'Add product'}</h3>
+            <form onSubmit={handleSubmit}>
+              <div className="form-grid">
+                <label>
+                  Name
+                  <input
+                    value={form.name}
+                    onChange={(e) =>
+                      setForm({ ...form, name: e.target.value })
+                    }
+                    required
+                  />
+                </label>
+                <label>
+                  Description
+                  <input
+                    value={form.description ?? ''}
+                    onChange={(e) =>
+                      setForm({ ...form, description: e.target.value })
+                    }
+                  />
+                </label>
+                <label>
+                  Price
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={form.price}
+                    onChange={(e) =>
+                      setForm({ ...form, price: Number(e.target.value) })
+                    }
+                    required
+                  />
+                </label>
+                <label>
+                  Stock quantity
+                  <input
+                    type="number"
+                    min="0"
+                    value={form.stockQuantity}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        stockQuantity: Number(e.target.value),
+                      })
+                    }
+                    required
+                  />
+                </label>
+              </div>
+              {error && <div className="error">{error}</div>}
+              <div className="row">
+                <button type="submit">
+                  {form.id ? 'Update product' : 'Add product'}
+                </button>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => setEditorOpen(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
-      {error && <div className="error">{error}</div>}
+      {error && !editorOpen && <div className="error">{error}</div>}
       {loading ? (
         <p className="muted">Loading…</p>
       ) : (
@@ -176,7 +203,11 @@ export default function ProductsPage() {
                   <td className="row">
                     <button
                       className="secondary"
-                      onClick={() => setForm(product)}
+                      onClick={() => {
+                        setForm(product)
+                        setError(null)
+                        setEditorOpen(true)
+                      }}
                     >
                       Edit
                     </button>
