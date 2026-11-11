@@ -29,7 +29,9 @@ function orderTotal(order: Order): number {
 
 export default function OrdersPage() {
   const { role } = useAuth()
-  const canOrder = role === 'CUSTOMER' || role === 'ADMIN'
+  // Only admins place orders from this page (on behalf of a chosen
+  // customer). Customers order through their cart, always for themselves.
+  const isAdmin = role === 'ADMIN'
   const [orders, setOrders] = useState<Order[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -127,9 +129,12 @@ export default function OrdersPage() {
         </p>
       )}
       {role === 'CUSTOMER' && (
-        <p className="muted">Your orders.</p>
+        <p className="muted">
+          Your orders. New orders come from your cart and are always placed
+          for your own account — there is no ordering for someone else.
+        </p>
       )}
-      {canOrder && (
+      {isAdmin && (
       <form className="panel" onSubmit={handleCreate}>
         <div className="form-grid">
           <label>

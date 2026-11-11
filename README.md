@@ -8,11 +8,16 @@ React + Vite + TypeScript frontend for the
 
 - **Three account types** — register as a **Customer** or a **Seller**
   (Admins are created out-of-band). The UI adapts to the role in your JWT:
-  - *Customer*: browses all products, places orders, sees only their own
-    orders.
+  - *Customer*: browses all products, adds them to a **cart** and checks
+    out. Orders are always placed for the customer's **own** account-linked
+    customer record — there is no way to order for someone else; the
+    backend enforces this even if a request names another customer.
   - *Seller*: manages only their own product catalog, sees incoming orders
     containing their products (trimmed to their own items).
-  - *Admin*: sees and manages everything, including deletes.
+  - *Admin*: sees and manages everything, including deletes, and can place
+    an order on behalf of any customer from the Orders page.
+- **Cart** — customers add products from the catalog, adjust quantities,
+  and place the order in one checkout. The cart persists in `localStorage`.
 - **Login / Register** against `/api/auth` — the JWT is stored in
   `localStorage` and attached to every request as a Bearer token.
 - **Products** — list with the owning seller shown; create/edit for
