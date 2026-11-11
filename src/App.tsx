@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react'
 import { AuthProvider, useAuth } from './auth/AuthContext'
+import { CartProvider, useCart } from './cart/CartContext'
 import AuthPage from './pages/AuthPage'
+import CartPage from './pages/CartPage'
 import CustomersPage from './pages/CustomersPage'
 import OrdersPage from './pages/OrdersPage'
 import ProductsPage from './pages/ProductsPage'
 
-type Tab = 'products' | 'customers' | 'orders'
+type Tab = 'products' | 'customers' | 'orders' | 'cart'
 
 function Shell() {
   const { username, role, logout } = useAuth()
+  const { count } = useCart()
   const [tab, setTab] = useState<Tab>('products')
 
   // Every login starts on Products. Without this, the previous user's tab
@@ -50,6 +53,14 @@ function Shell() {
           >
             Orders
           </button>
+          {role === 'CUSTOMER' && (
+            <button
+              className={tab === 'cart' ? 'nav active' : 'nav'}
+              onClick={() => setTab('cart')}
+            >
+              Cart{count > 0 ? ` (${count})` : ''}
+            </button>
+          )}
         </nav>
         <span className="user">
           {username}
@@ -63,6 +74,9 @@ function Shell() {
         {tab === 'products' && <ProductsPage />}
         {tab === 'customers' && showCustomers && <CustomersPage />}
         {tab === 'orders' && <OrdersPage />}
+        {tab === 'cart' && role === 'CUSTOMER' && (
+          <CartPage onGoToOrders={() => setTab('orders')} />
+        )}
       </main>
     </div>
   )
@@ -71,7 +85,9 @@ function Shell() {
 export default function App() {
   return (
     <AuthProvider>
-      <Shell />
+      <CartProvider>
+        <Shell />
+      </CartProvider>
     </AuthProvider>
   )
 }

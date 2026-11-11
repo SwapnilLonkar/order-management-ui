@@ -43,7 +43,9 @@ export interface OrderItem {
 
 export interface Order {
   id: number | null
-  customerId: number
+  // Null in a create request from a CUSTOMER account: the backend orders
+  // for the signed-in customer's own record. Responses always carry the id.
+  customerId: number | null
   placedById: number | null
   placedByUsername: string | null
   status: OrderStatus | null

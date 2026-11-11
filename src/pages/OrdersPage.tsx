@@ -59,7 +59,8 @@ export default function OrdersPage() {
     void refresh()
   }, [])
 
-  function customerName(id: number): string {
+  function customerName(id: number | null): string {
+    if (id == null) return '—'
     return customers.find((c) => c.id === id)?.name ?? `#${id}`
   }
 

@@ -7,6 +7,7 @@ import {
 } from '../api/client'
 import type { Product } from '../api/types'
 import { useAuth } from '../auth/AuthContext'
+import { useCart } from '../cart/CartContext'
 
 const EMPTY: Product = {
   id: null,
@@ -20,8 +21,11 @@ const EMPTY: Product = {
 
 export default function ProductsPage() {
   const { role } = useAuth()
+  const { add } = useCart()
   const canManage = role === 'SELLER' || role === 'ADMIN'
   const canDelete = role === 'ADMIN'
+  const canShop = role === 'CUSTOMER'
+  const [addedId, setAddedId] = useState<number | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [form, setForm] = useState<Product>(EMPTY)
   const [error, setError] = useState<string | null>(null)
@@ -153,6 +157,7 @@ export default function ProductsPage() {
               <th>Stock</th>
               <th>Seller</th>
               {canManage && <th></th>}
+              {canShop && <th></th>}
             </tr>
           </thead>
           <tbody>
@@ -184,6 +189,24 @@ export default function ProductsPage() {
                     )}
                   </td>
                 )}
+                {canShop && (
+                  <td>
+                    <button
+                      disabled={product.stockQuantity === 0}
+                      onClick={() => {
+                        add(product)
+                        setAddedId(product.id)
+                        window.setTimeout(() => setAddedId(null), 1200)
+                      }}
+                    >
+                      {product.stockQuantity === 0
+                        ? 'Out of stock'
+                        : addedId === product.id
+                          ? 'Added ✓'
+                          : 'Add to cart'}
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
             {products.length === 0 && (
@@ -201,7 +224,8 @@ export default function ProductsPage() {
       )}
       {role === 'CUSTOMER' && (
         <p className="muted">
-          Browsing as a customer — head to Orders to place an order.
+          Browsing as a customer — add products to your cart and check out
+          from the Cart tab. Orders are always placed for your own account.
         </p>
       )}
       {role === 'ADMIN' && (
