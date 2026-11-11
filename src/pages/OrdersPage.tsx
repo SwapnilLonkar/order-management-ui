@@ -294,12 +294,7 @@ export default function OrdersPage() {
           </tbody>
         </table>
       )}
-      {role === 'CUSTOMER' ? (
-        <p className="muted">
-          The seller updates the status as your order is fulfilled — you
-          can't change it yourself.
-        </p>
-      ) : (
+      {role !== 'CUSTOMER' && (
         <p className="muted">
           Status cannot change once an order is DELIVERED or CANCELLED — the
           API rejects it.
