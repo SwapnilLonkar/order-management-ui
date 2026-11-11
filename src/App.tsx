@@ -63,9 +63,7 @@ function Shell() {
             </button>
           )}
         </nav>
-        <span className="user">
-          {username}
-          {role ? ` ${role}` : ''}
+        <span className="user">{username}</span>
           <button className="secondary" onClick={logout}>
             Log out
           </button>
