@@ -1,0 +1,38 @@
+# Order Management UI
+
+React + Vite + TypeScript frontend for the
+[order-management-api](https://github.com/SwapnilLonkar/order-management-api)
+(Spring Boot) backend. Talks to the API over JWT-secured REST endpoints.
+
+## Features
+
+- **Login / Register** against `/api/auth` — the JWT is stored in
+  `localStorage` and attached to every request as a Bearer token.
+- **Products** — list, create, edit, delete.
+- **Customers** — list, create, edit, delete.
+- **Orders** — list with per-order totals, create an order for a customer
+  with multiple product items, and move an order through its status flow
+  (PENDING → CONFIRMED → SHIPPED → DELIVERED / CANCELLED).
+
+Backend rules the UI respects: DELETE endpoints require an ADMIN role,
+and an order's status cannot change once it is DELIVERED or CANCELLED.
+
+## Running locally
+
+Prerequisites: Node 20+, and the backend running (see the API repo —
+`docker-compose up -d` for Postgres, then run the app on port 8080).
+
+```bash
+cp .env.example .env   # set VITE_API_BASE_URL to your backend base URL
+npm install
+npm run dev            # http://localhost:5173
+```
+
+The backend enables CORS for `http://localhost:5173` (and the OMS
+codespace's forwarded 5173 URL) in its `SecurityConfig`.
+
+## Scripts
+
+- `npm run dev` — start the Vite dev server
+- `npm run build` — type-check (`tsc -b`) and build for production
+- `npm run preview` — preview the production build
