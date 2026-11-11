@@ -22,7 +22,8 @@ React + Vite + TypeScript frontend for the
   `localStorage` and attached to every request as a Bearer token.
 - **Products** — list with the owning seller shown; create/edit for
   sellers and admins.
-- **Customers** — recipient directory for sellers and admins.
+- **Customers** — recipient directory, managed by admins only (sellers and
+  customers never see it; the API restricts customer writes to ADMIN).
 - **Orders** — list with per-order totals and color-coded status badges,
   create an order with multiple product items, and move an order through
   its status flow (PENDING → CONFIRMED → SHIPPED → DELIVERED / CANCELLED).
