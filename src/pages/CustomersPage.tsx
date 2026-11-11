@@ -158,7 +158,6 @@ export default function CustomersPage() {
           </tbody>
         </table>
       )}
-      <p className="muted">Deleting a customer requires an ADMIN account.</p>
     </section>
   )
 }

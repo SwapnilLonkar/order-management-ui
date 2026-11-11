@@ -25,8 +25,9 @@ function Shell() {
     return <AuthPage />
   }
 
-  // Customers (the recipient directory) is a back-office view for sellers and admins.
-  const showCustomers = role !== 'CUSTOMER'
+  // The Customers directory is managed by admins only — sellers and
+  // customers never see this tab (the API also restricts writes to ADMIN).
+  const showCustomers = role === 'ADMIN'
 
   return (
     <div className="layout">
@@ -64,7 +65,7 @@ function Shell() {
         </nav>
         <span className="user">
           {username}
-          {role ? ` (${role})` : ''}
+          {role ? ` ${role}` : ''}
           <button className="secondary" onClick={logout}>
             Log out
           </button>
