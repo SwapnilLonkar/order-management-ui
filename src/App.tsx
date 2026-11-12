@@ -32,7 +32,13 @@ function Shell() {
   return (
     <div className="layout">
       <header>
-        <span className="brand">OMS</span>
+        <span
+          className="brand"
+          onClick={() => setTab('products')}
+          title="Home"
+        >
+          OMS
+        </span>
         <nav>
           <button
             className={tab === 'products' ? 'nav active' : 'nav'}
