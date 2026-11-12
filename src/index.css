@@ -849,3 +849,10 @@ th {
   width: auto;
   min-width: 190px;
 }
+
+/* The toolbar's checkbox label reads beside its box, not under it (the
+   global label style stacks label text over its control). */
+.toolbar label.check {
+  flex-direction: row;
+  align-items: center;
+}
