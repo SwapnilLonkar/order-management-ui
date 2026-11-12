@@ -672,3 +672,18 @@ ol.top-list li::before {
 ol.top-list li span:first-of-type {
   flex: 1;
 }
+
+.img-preview {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+
+.img-preview img {
+  width: 110px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}

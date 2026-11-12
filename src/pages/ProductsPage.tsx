@@ -1,4 +1,9 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import {
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from 'react'
 import {
   createProduct,
   deleteProduct,
@@ -100,6 +105,39 @@ export default function ProductsPage() {
       }
     })
 
+  /**
+   * Reads a picked image file into the form as a data URL (which the
+   * backend stores in the product's imageUrl). Photos larger than 1000px
+   * are downscaled on a canvas first so the stored value stays small.
+   */
+  function handleImageFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      const dataUrl = reader.result as string
+      const img = new Image()
+      img.onload = () => {
+        const max = 1000
+        if (img.width <= max && img.height <= max) {
+          setForm((f) => ({ ...f, imageUrl: dataUrl }))
+          return
+        }
+        const scale = max / Math.max(img.width, img.height)
+        const canvas = document.createElement('canvas')
+        canvas.width = Math.round(img.width * scale)
+        canvas.height = Math.round(img.height * scale)
+        canvas.getContext('2d')?.drawImage(img, 0, 0, canvas.width, canvas.height)
+        setForm((f) => ({
+          ...f,
+          imageUrl: canvas.toDataURL('image/jpeg', 0.85),
+        }))
+      }
+      img.src = dataUrl
+    }
+    reader.readAsDataURL(file)
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setError(null)
@@ -179,13 +217,37 @@ export default function ProductsPage() {
                 <label>
                   Image URL
                   <input
-                    value={form.imageUrl ?? ''}
+                    value={
+                      form.imageUrl?.startsWith('data:')
+                        ? ''
+                        : (form.imageUrl ?? '')
+                    }
                     onChange={(e) =>
                       setForm({ ...form, imageUrl: e.target.value })
                     }
                     placeholder="https://…"
                   />
                 </label>
+                <label>
+                  Upload image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageFile}
+                  />
+                </label>
+                {form.imageUrl && (
+                  <div className="img-preview">
+                    <img src={form.imageUrl} alt="Product preview" />
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={() => setForm({ ...form, imageUrl: null })}
+                    >
+                      Remove image
+                    </button>
+                  </div>
+                )}
                 <label>
                   Price
                   <input
