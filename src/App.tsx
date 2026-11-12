@@ -32,7 +32,7 @@ function Shell() {
   return (
     <div className="layout">
       <header>
-        <span className="brand">Order Management</span>
+        <span className="brand">OMS</span>
         <nav>
           <button
             className={tab === 'products' ? 'nav active' : 'nav'}
@@ -54,19 +54,24 @@ function Shell() {
           >
             Orders
           </button>
+        </nav>
+        <div className="header-actions">
           {role === 'CUSTOMER' && (
             <button
-              className={tab === 'cart' ? 'nav active' : 'nav'}
+              className={tab === 'cart' ? 'icon-btn active' : 'icon-btn'}
               onClick={() => setTab('cart')}
+              aria-label="Cart"
+              title="Cart"
             >
-              Cart{count > 0 ? ` (${count})` : ''}
+              🛒
+              {count > 0 && <span className="cart-badge">{count}</span>}
             </button>
           )}
-        </nav>
-        <span className="user">{username}</span>
-        <button className="secondary" onClick={logout}>
-          Log out
-        </button>
+          <span className="user">{username}</span>
+          <button className="secondary" onClick={logout}>
+            Log out
+          </button>
+        </div>
       </header>
       <main>
         {tab === 'products' && <ProductsPage />}
