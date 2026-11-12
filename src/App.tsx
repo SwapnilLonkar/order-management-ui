@@ -4,10 +4,11 @@ import { CartProvider, useCart } from './cart/CartContext'
 import AuthPage from './pages/AuthPage'
 import CartPage from './pages/CartPage'
 import CustomersPage from './pages/CustomersPage'
+import DashboardPage from './pages/DashboardPage'
 import OrdersPage from './pages/OrdersPage'
 import ProductsPage from './pages/ProductsPage'
 
-type Tab = 'products' | 'customers' | 'orders' | 'cart'
+type Tab = 'dashboard' | 'products' | 'customers' | 'orders' | 'cart'
 
 function Shell() {
   const { username, role, logout } = useAuth()
@@ -29,6 +30,10 @@ function Shell() {
   // customers never see this tab (the API also restricts writes to ADMIN).
   const showCustomers = role === 'ADMIN'
 
+  // The dashboard aggregates orders and products, which only make sense
+  // for the accounts that sell or administer: sellers and admins.
+  const showDashboard = role === 'SELLER' || role === 'ADMIN'
+
   return (
     <div className="layout">
       <header>
@@ -40,6 +45,14 @@ function Shell() {
           OMS
         </span>
         <nav>
+          {showDashboard && (
+            <button
+              className={tab === 'dashboard' ? 'nav active' : 'nav'}
+              onClick={() => setTab('dashboard')}
+            >
+              Dashboard
+            </button>
+          )}
           <button
             className={tab === 'products' ? 'nav active' : 'nav'}
             onClick={() => setTab('products')}
@@ -80,6 +93,7 @@ function Shell() {
         </div>
       </header>
       <main>
+        {tab === 'dashboard' && showDashboard && <DashboardPage />}
         {tab === 'products' && <ProductsPage />}
         {tab === 'customers' && showCustomers && <CustomersPage />}
         {tab === 'orders' && <OrdersPage />}
