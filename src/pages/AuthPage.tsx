@@ -33,7 +33,7 @@ export default function AuthPage() {
   return (
     <div className="auth-wrap">
       <form className="auth-card" onSubmit={handleSubmit}>
-        <h1>Order Management</h1>
+        <div className="auth-logo">OMS</div>
         <p className="muted">
           {mode === 'login'
             ? 'Sign in to manage products, customers and orders.'

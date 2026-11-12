@@ -328,6 +328,18 @@ button.nav.active:hover {
   gap: 0.9rem;
 }
 
+.auth-logo {
+  align-self: center;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #fff;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  padding: 0.55rem 1.3rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+}
+
 .auth-card h1 {
   margin: 0;
   font-size: 1.4rem;
