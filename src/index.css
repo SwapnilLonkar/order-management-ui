@@ -554,3 +554,24 @@ button.nav.active:hover {
   font-size: 1.15rem;
   background: linear-gradient(135deg, #e0e7ff, #f5d0fe);
 }
+
+.toolbar {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.toolbar .search {
+  flex: 1;
+  min-width: 180px;
+}
+
+.toolbar label.check {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+  font-size: 0.9rem;
+  cursor: pointer;
+}

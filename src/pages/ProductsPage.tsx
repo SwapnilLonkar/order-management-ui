@@ -54,6 +54,11 @@ export default function ProductsPage() {
   const canDelete = role === 'ADMIN'
   const canShop = role === 'CUSTOMER'
   const [products, setProducts] = useState<Product[]>([])
+  const [query, setQuery] = useState('')
+  const [inStockOnly, setInStockOnly] = useState(false)
+  const [sort, setSort] = useState<'featured' | 'price-asc' | 'price-desc' | 'name'>(
+    'featured',
+  )
   const [form, setForm] = useState<Product>(EMPTY)
   const [editorOpen, setEditorOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -73,6 +78,24 @@ export default function ProductsPage() {
   useEffect(() => {
     void refresh()
   }, [])
+
+  const visible = products
+    .filter((p) =>
+      p.name.toLowerCase().includes(query.trim().toLowerCase()),
+    )
+    .filter((p) => !inStockOnly || p.stockQuantity > 0)
+    .sort((a, b) => {
+      switch (sort) {
+        case 'price-asc':
+          return a.price - b.price
+        case 'price-desc':
+          return b.price - a.price
+        case 'name':
+          return a.name.localeCompare(b.name)
+        default:
+          return 0
+      }
+    })
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
@@ -207,12 +230,40 @@ export default function ProductsPage() {
         </div>
       )}
 
+      <div className="toolbar">
+        <input
+          className="search"
+          type="search"
+          placeholder="Search products…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value as typeof sort)}
+          aria-label="Sort products"
+        >
+          <option value="featured">Sort: Featured</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="name">Name: A to Z</option>
+        </select>
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={inStockOnly}
+            onChange={(e) => setInStockOnly(e.target.checked)}
+          />
+          In stock only
+        </label>
+      </div>
+
       {error && !editorOpen && <div className="error">{error}</div>}
       {loading ? (
         <p className="muted">Loading…</p>
       ) : role === 'CUSTOMER' ? (
         <div className="product-grid">
-          {products.map((product) => {
+          {visible.map((product) => {
             const cartItem = items.find(
               (item) => item.productId === product.id,
             )
@@ -275,8 +326,12 @@ export default function ProductsPage() {
               </div>
             )
           })}
-          {products.length === 0 && (
-            <p className="muted">No products yet.</p>
+          {visible.length === 0 && (
+            <p className="muted">
+              {products.length === 0
+                ? 'No products yet.'
+                : 'No products match your search.'}
+            </p>
           )}
         </div>
       ) : (
@@ -295,7 +350,7 @@ export default function ProductsPage() {
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => {
+            {visible.map((product) => {
               const cartItem = items.find(
                 (item) => item.productId === product.id,
               )
@@ -380,10 +435,12 @@ export default function ProductsPage() {
               </tr>
               )
             })}
-            {products.length === 0 && (
+            {visible.length === 0 && (
               <tr>
                 <td colSpan={8} className="muted">
-                  No products yet.
+                  {products.length === 0
+                    ? 'No products yet.'
+                    : 'No products match your search.'}
                 </td>
               </tr>
             )}
