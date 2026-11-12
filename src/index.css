@@ -856,3 +856,13 @@ th {
   flex-direction: row;
   align-items: center;
 }
+
+/* Keep the checkbox at its natural size so the label text stays on one
+   line (the global input rule stretches it to 100% width otherwise). */
+.toolbar label.check input {
+  width: auto;
+}
+
+.toolbar label.check {
+  white-space: nowrap;
+}
