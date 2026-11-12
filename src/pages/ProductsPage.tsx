@@ -20,6 +20,9 @@ const EMPTY: Product = {
   sellerUsername: null,
 }
 
+/** At or below this stock level a product gets an "Only X left" badge. */
+const LOW_STOCK = 15
+
 function ProductImage({
   product,
   variant,
@@ -268,7 +271,14 @@ export default function ProductsPage() {
               (item) => item.productId === product.id,
             )
             return (
-              <div className="product-card" key={product.id}>
+              <div
+                className={
+                  product.stockQuantity === 0
+                    ? 'product-card out-of-stock'
+                    : 'product-card'
+                }
+                key={product.id}
+              >
                 <ProductImage product={product} variant="card" />
                 <div className="product-card-top">
                   <h3>{product.name}</h3>
@@ -276,15 +286,17 @@ export default function ProductsPage() {
                 </div>
                 <p className="muted product-desc">{product.description}</p>
                 <div className="product-meta">
-                  <span
-                    className={
-                      product.stockQuantity === 0 ? 'stock out' : 'stock'
-                    }
-                  >
-                    {product.stockQuantity === 0
-                      ? 'Out of stock'
-                      : `${product.stockQuantity} in stock`}
-                  </span>
+                  {product.stockQuantity === 0 ? (
+                    <span className="stock out">Out of stock</span>
+                  ) : product.stockQuantity <= LOW_STOCK ? (
+                    <span className="badge badge-low">
+                      Only {product.stockQuantity} left
+                    </span>
+                  ) : (
+                    <span className="stock">
+                      {product.stockQuantity} in stock
+                    </span>
+                  )}
                   <span className="muted">
                     Seller: {product.sellerUsername ?? '—'}
                   </span>
@@ -363,7 +375,24 @@ export default function ProductsPage() {
                 <td>{product.name}</td>
                 <td>{product.description}</td>
                 <td>${product.price.toFixed(2)}</td>
-                <td>{product.stockQuantity}</td>
+                <td>
+                  {product.stockQuantity}
+                  {product.stockQuantity === 0 ? (
+                    <span
+                      className="badge badge-cancelled"
+                      style={{ marginLeft: '0.4rem' }}
+                    >
+                      Out
+                    </span>
+                  ) : product.stockQuantity <= LOW_STOCK ? (
+                    <span
+                      className="badge badge-low"
+                      style={{ marginLeft: '0.4rem' }}
+                    >
+                      Low stock
+                    </span>
+                  ) : null}
+                </td>
                 <td>{product.sellerUsername ?? '—'}</td>
                 {canManage && (
                   <td className="row">

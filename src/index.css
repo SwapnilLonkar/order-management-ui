@@ -575,3 +575,16 @@ button.nav.active:hover {
   font-size: 0.9rem;
   cursor: pointer;
 }
+
+.badge-low {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.product-card.out-of-stock {
+  opacity: 0.65;
+}
+
+.product-card.out-of-stock .product-img {
+  filter: grayscale(1);
+}
