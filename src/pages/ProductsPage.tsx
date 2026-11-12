@@ -279,12 +279,6 @@ export default function ProductsPage() {
           </tbody>
         </table>
       )}
-      {role === 'CUSTOMER' && (
-        <p className="muted">
-          Browsing as a customer — add products to your cart and check out
-          from the Cart tab. Orders are always placed for your own account.
-        </p>
-      )}
       {role === 'ADMIN' && (
         <p className="muted">Admins see every seller's products.</p>
       )}
