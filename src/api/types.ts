@@ -6,6 +6,7 @@ export interface Product {
   id: number | null
   name: string
   description: string | null
+  imageUrl: string | null
   price: number
   stockQuantity: number
   sellerId: number | null

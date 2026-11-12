@@ -13,10 +13,38 @@ const EMPTY: Product = {
   id: null,
   name: '',
   description: '',
+  imageUrl: null,
   price: 0,
   stockQuantity: 0,
   sellerId: null,
   sellerUsername: null,
+}
+
+function ProductImage({
+  product,
+  variant,
+}: {
+  product: Product
+  variant: 'card' | 'thumb'
+}) {
+  const [failed, setFailed] = useState(false)
+  const className = variant === 'card' ? 'product-img' : 'thumb'
+  if (!product.imageUrl || failed) {
+    return (
+      <div className={`${className} fallback`} aria-hidden="true">
+        🛍️
+      </div>
+    )
+  }
+  return (
+    <img
+      className={className}
+      src={product.imageUrl}
+      alt={product.name}
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  )
 }
 
 export default function ProductsPage() {
@@ -123,6 +151,16 @@ export default function ProductsPage() {
                   />
                 </label>
                 <label>
+                  Image URL
+                  <input
+                    value={form.imageUrl ?? ''}
+                    onChange={(e) =>
+                      setForm({ ...form, imageUrl: e.target.value })
+                    }
+                    placeholder="https://…"
+                  />
+                </label>
+                <label>
                   Price
                   <input
                     type="number"
@@ -180,6 +218,7 @@ export default function ProductsPage() {
             )
             return (
               <div className="product-card" key={product.id}>
+                <ProductImage product={product} variant="card" />
                 <div className="product-card-top">
                   <h3>{product.name}</h3>
                   <span className="price">${product.price.toFixed(2)}</span>
@@ -245,6 +284,7 @@ export default function ProductsPage() {
           <thead>
             <tr>
               <th>ID</th>
+              <th></th>
               <th>Name</th>
               <th>Description</th>
               <th>Price</th>
@@ -262,6 +302,9 @@ export default function ProductsPage() {
               return (
               <tr key={product.id}>
                 <td>{product.id}</td>
+                <td>
+                  <ProductImage product={product} variant="thumb" />
+                </td>
                 <td>{product.name}</td>
                 <td>{product.description}</td>
                 <td>${product.price.toFixed(2)}</td>
@@ -339,7 +382,7 @@ export default function ProductsPage() {
             })}
             {products.length === 0 && (
               <tr>
-                <td colSpan={7} className="muted">
+                <td colSpan={8} className="muted">
                   No products yet.
                 </td>
               </tr>

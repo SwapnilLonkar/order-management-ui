@@ -521,3 +521,36 @@ button.nav.active:hover {
 .modal h3 {
   margin-top: 0;
 }
+
+.product-img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #e0e7ff;
+}
+
+.product-img.fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.4rem;
+  background: linear-gradient(135deg, #e0e7ff, #f5d0fe);
+}
+
+.thumb {
+  width: 46px;
+  height: 46px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+  background: #e0e7ff;
+}
+
+.thumb.fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  background: linear-gradient(135deg, #e0e7ff, #f5d0fe);
+}
