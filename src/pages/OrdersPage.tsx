@@ -122,6 +122,21 @@ export default function OrdersPage() {
     }
   }
 
+  async function handleCancel(order: Order) {
+    if (!order.id) return
+    if (!window.confirm('Cancel this order? The items go back to stock.'))
+      return
+    setError(null)
+    try {
+      await updateOrderStatus(order.id, 'CANCELLED')
+      await refresh()
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to cancel the order.',
+      )
+    }
+  }
+
   return (
     <section>
       <h2>{role === 'SELLER' ? 'Incoming Orders' : 'Orders'}</h2>
@@ -281,6 +296,16 @@ export default function OrdersPage() {
                       ))}
                     </select>
                   )}
+                  {role === 'CUSTOMER' &&
+                    (order.status === 'PENDING' ||
+                      order.status === 'CONFIRMED') && (
+                      <button
+                        className="danger"
+                        onClick={() => void handleCancel(order)}
+                      >
+                        Cancel order
+                      </button>
+                    )}
                 </td>
               </tr>
             ))}
