@@ -88,19 +88,19 @@ export default function DashboardPage() {
         <>
           <div className="stat-grid">
             <div className="stat-card">
-              <span className="stat-label">Revenue (excl. cancelled)</span>
+              <span className="stat-label">💰 Revenue (excl. cancelled)</span>
               <span className="stat-value">${stats.revenue.toFixed(2)}</span>
             </div>
             <div className="stat-card">
-              <span className="stat-label">Total orders</span>
+              <span className="stat-label">🧾 Total orders</span>
               <span className="stat-value">{orders.length}</span>
             </div>
             <div className="stat-card">
-              <span className="stat-label">Products</span>
+              <span className="stat-label">📦 Products</span>
               <span className="stat-value">{products.length}</span>
             </div>
             <div className="stat-card">
-              <span className="stat-label">Low-stock products</span>
+              <span className="stat-label">⚠️ Low-stock products</span>
               <span className="stat-value">{stats.lowStock.length}</span>
             </div>
           </div>
