@@ -172,6 +172,74 @@ export default function ProductsPage() {
       {error && !editorOpen && <div className="error">{error}</div>}
       {loading ? (
         <p className="muted">Loading…</p>
+      ) : role === 'CUSTOMER' ? (
+        <div className="product-grid">
+          {products.map((product) => {
+            const cartItem = items.find(
+              (item) => item.productId === product.id,
+            )
+            return (
+              <div className="product-card" key={product.id}>
+                <div className="product-card-top">
+                  <h3>{product.name}</h3>
+                  <span className="price">${product.price.toFixed(2)}</span>
+                </div>
+                <p className="muted product-desc">{product.description}</p>
+                <div className="product-meta">
+                  <span
+                    className={
+                      product.stockQuantity === 0 ? 'stock out' : 'stock'
+                    }
+                  >
+                    {product.stockQuantity === 0
+                      ? 'Out of stock'
+                      : `${product.stockQuantity} in stock`}
+                  </span>
+                  <span className="muted">
+                    Seller: {product.sellerUsername ?? '—'}
+                  </span>
+                </div>
+                <div className="product-action">
+                  {cartItem ? (
+                    <div className="stepper">
+                      <button
+                        className="secondary"
+                        onClick={() =>
+                          setQuantity(cartItem.productId, cartItem.quantity - 1)
+                        }
+                      >
+                        −
+                      </button>
+                      <span className="qty">{cartItem.quantity}</span>
+                      <button
+                        className="secondary"
+                        disabled={cartItem.quantity >= product.stockQuantity}
+                        onClick={() =>
+                          setQuantity(cartItem.productId, cartItem.quantity + 1)
+                        }
+                      >
+                        +
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      className="add-btn"
+                      disabled={product.stockQuantity === 0}
+                      onClick={() => add(product)}
+                    >
+                      {product.stockQuantity === 0
+                        ? 'Out of stock'
+                        : 'Add to cart'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+          {products.length === 0 && (
+            <p className="muted">No products yet.</p>
+          )}
+        </div>
       ) : (
         <table>
           <thead>
