@@ -85,6 +85,7 @@ export default function CartPage({
                     <input
                       type="number"
                       min={1}
+                      max={item.stock > 0 ? item.stock : undefined}
                       value={item.quantity}
                       onChange={(e) =>
                         setQuantity(
@@ -94,6 +95,9 @@ export default function CartPage({
                       }
                       style={{ width: '4.5rem' }}
                     />
+                    {item.stock > 0 && item.quantity >= item.stock && (
+                      <div className="muted">Only {item.stock} available</div>
+                    )}
                   </td>
                   <td>${(item.price * item.quantity).toFixed(2)}</td>
                   <td>

@@ -14,6 +14,9 @@ export interface CartItem {
   name: string
   price: number
   quantity: number
+  /** Stock available when the item was added; the cart caps quantity here,
+   *  the same limit the Products page stepper enforces. */
+  stock: number
 }
 
 interface CartState {
@@ -32,7 +35,9 @@ const STORAGE_KEY = 'oms_cart'
 function loadCart(): CartItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? (JSON.parse(raw) as CartItem[]) : []
+    const items = raw ? (JSON.parse(raw) as CartItem[]) : []
+    // Carts saved before items carried stock have no cap until re-added.
+    return items.map((item) => ({ stock: 0, ...item }))
   } catch {
     return []
   }
@@ -53,7 +58,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (existing) {
         return prev.map((item) =>
           item.productId === productId
-            ? { ...item, quantity: item.quantity + 1 }
+            ? {
+                ...item,
+                stock: product.stockQuantity,
+                quantity: Math.min(
+                  item.quantity + 1,
+                  product.stockQuantity,
+                ),
+              }
             : item,
         )
       }
@@ -64,6 +76,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           name: product.name,
           price: product.price,
           quantity: 1,
+          stock: product.stockQuantity,
         },
       ]
     })
@@ -77,9 +90,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) =>
       quantity <= 0
         ? prev.filter((item) => item.productId !== productId)
-        : prev.map((item) =>
-            item.productId === productId ? { ...item, quantity } : item,
-          ),
+        : prev.map((item) => {
+            if (item.productId !== productId) return item
+            const capped =
+              item.stock > 0 ? Math.min(quantity, item.stock) : quantity
+            return { ...item, quantity: capped }
+          }),
     )
   }, [])
 
