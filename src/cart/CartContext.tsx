@@ -37,7 +37,7 @@ function loadCart(): CartItem[] {
     const raw = localStorage.getItem(STORAGE_KEY)
     const items = raw ? (JSON.parse(raw) as CartItem[]) : []
     // Carts saved before items carried stock have no cap until re-added.
-    return items.map((item) => ({ stock: 0, ...item }))
+    return items.map((item) => ({ ...item, stock: item.stock ?? 0 }))
   } catch {
     return []
   }
