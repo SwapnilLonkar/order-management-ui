@@ -1146,3 +1146,116 @@ tbody tr:hover {
 .qv-details h3 {
   margin: 0;
 }
+
+/* Dashboard charts */
+.chart-bars {
+  display: flex;
+  gap: 0.4rem;
+  align-items: flex-end;
+  padding: 0.75rem 0.5rem 0.25rem;
+}
+
+.chart-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.chart-track {
+  height: 120px;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.chart-bar {
+  width: 70%;
+  max-width: 34px;
+  border-radius: 5px 5px 0 0;
+  background: linear-gradient(180deg, #00aae7, #2368a0);
+}
+
+.chart-x {
+  font-size: 0.68rem;
+  color: #8c8c8c;
+  white-space: nowrap;
+}
+
+.hbars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  max-width: 560px;
+}
+
+.hbar-row {
+  display: grid;
+  grid-template-columns: 92px 1fr 28px;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.hbar-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #232527;
+}
+
+.hbar-track {
+  height: 14px;
+  background: #eef2f6;
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.hbar-fill {
+  height: 100%;
+  border-radius: 7px;
+  transition: width 0.3s ease;
+}
+
+.fill-pending {
+  background: #9fc6e8;
+}
+
+.fill-confirmed {
+  background: #2368a0;
+}
+
+.fill-shipped {
+  background: #0d416b;
+}
+
+.fill-delivered {
+  background: #2e9e5b;
+}
+
+.fill-cancelled {
+  background: #ef4048;
+}
+
+.hbar-count {
+  font-weight: 700;
+  text-align: right;
+}
+
+.top-bar {
+  flex: 1;
+  height: 8px;
+  background: #eef2f6;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0 0.6rem;
+}
+
+.top-bar-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #2368a0, #00aae7);
+  border-radius: 4px;
+}

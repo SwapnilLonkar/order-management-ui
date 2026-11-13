@@ -73,7 +73,42 @@ export default function DashboardPage() {
     const lowStock = products
       .filter((p) => p.stockQuantity <= LOW_STOCK)
       .sort((a, b) => a.stockQuantity - b.stockQuantity)
-    return { revenue, byStatus, topProducts, lowStock }
+    // Revenue per day over the last 14 days (non-cancelled orders).
+    const revenueOf = (order: Order) =>
+      order.items.reduce(
+        (s, item) => s + (item.priceAtPurchase ?? 0) * item.quantity,
+        0,
+      )
+    const byDay = new Map<string, number>()
+    for (const order of active) {
+      if (!order.orderDate) continue
+      const d = new Date(order.orderDate)
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
+      byDay.set(key, (byDay.get(key) ?? 0) + revenueOf(order))
+    }
+    const now = new Date()
+    const revenueByDay = Array.from({ length: 14 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (13 - i))
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
+      return {
+        key,
+        label: `${d.toLocaleDateString(undefined, { weekday: 'narrow' })} ${d.getDate()}`,
+        revenue: byDay.get(key) ?? 0,
+      }
+    })
+    const maxDayRevenue = Math.max(0, ...revenueByDay.map((d) => d.revenue))
+    const maxStatusCount = Math.max(0, ...byStatus.values())
+    const maxTopQty = Math.max(0, ...topProducts.map((p) => p.qty))
+    return {
+      revenue,
+      byStatus,
+      topProducts,
+      lowStock,
+      revenueByDay,
+      maxDayRevenue,
+      maxStatusCount,
+      maxTopQty,
+    }
   }, [orders, products])
 
   return (
@@ -105,16 +140,58 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <h3>Orders by status</h3>
-          <div className="status-row">
-            {ORDER_STATUSES.map((status) => (
-              <span
-                key={status}
-                className={`badge badge-${status.toLowerCase()}`}
+          <h3>Revenue — last 14 days</h3>
+          <div
+            className="chart-bars"
+            role="img"
+            aria-label="Revenue per day for the last 14 days"
+          >
+            {stats.revenueByDay.map((day) => (
+              <div
+                className="chart-col"
+                key={day.key}
+                title={`${day.label}: $${day.revenue.toFixed(2)}`}
               >
-                {status}: {stats.byStatus.get(status) ?? 0}
-              </span>
+                <div className="chart-track">
+                  <div
+                    className="chart-bar"
+                    style={{
+                      height: `${
+                        stats.maxDayRevenue > 0
+                          ? Math.max(3, (day.revenue / stats.maxDayRevenue) * 100)
+                          : 3
+                      }%`,
+                    }}
+                  />
+                </div>
+                <span className="chart-x">{day.label}</span>
+              </div>
             ))}
+          </div>
+
+          <h3>Orders by status</h3>
+          <div className="hbars">
+            {ORDER_STATUSES.map((status) => {
+              const count = stats.byStatus.get(status) ?? 0
+              return (
+                <div className="hbar-row" key={status}>
+                  <span className="hbar-label">{status}</span>
+                  <div className="hbar-track">
+                    <div
+                      className={`hbar-fill fill-${status.toLowerCase()}`}
+                      style={{
+                        width: `${
+                          stats.maxStatusCount > 0
+                            ? (count / stats.maxStatusCount) * 100
+                            : 0
+                        }%`,
+                      }}
+                    />
+                  </div>
+                  <span className="hbar-count">{count}</span>
+                </div>
+              )
+            })}
           </div>
 
           <div className="dash-columns">
@@ -127,6 +204,18 @@ export default function DashboardPage() {
                   {stats.topProducts.map((p) => (
                     <li key={p.id}>
                       <span>{p.name}</span>
+                      <span className="top-bar">
+                        <span
+                          className="top-bar-fill"
+                          style={{
+                            width: `${
+                              stats.maxTopQty > 0
+                                ? (p.qty / stats.maxTopQty) * 100
+                                : 0
+                            }%`,
+                          }}
+                        />
+                      </span>
                       <span className="muted">{p.qty} sold</span>
                     </li>
                   ))}
