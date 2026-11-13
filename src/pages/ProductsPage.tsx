@@ -64,6 +64,130 @@ function ProductImage({
   )
 }
 
+/** Quick-look pop-up: full gallery + details without leaving the grid. */
+function QuickViewModal({
+  product,
+  onClose,
+}: {
+  product: Product
+  onClose: () => void
+}) {
+  const { role } = useAuth()
+  const { add, items, setQuantity } = useCart()
+  const gallery = galleryOf(product)
+  const [active, setActive] = useState(0)
+  const [failed, setFailed] = useState<ReadonlySet<number>>(new Set())
+  const cartItem = items.find((item) => item.productId === product.id)
+  const mainFailed = failed.has(active) || gallery.length === 0
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div
+        className="modal qv-modal"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-label={`Quick view of ${product.name}`}
+      >
+        <div className="qv-layout">
+          <div className="qv-gallery">
+            {mainFailed ? (
+              <div className="qv-main fallback" aria-hidden="true">
+                🛍️
+              </div>
+            ) : (
+              <img
+                className="qv-main"
+                src={gallery[active]}
+                alt={product.name}
+                onError={() =>
+                  setFailed((prev) => new Set(prev).add(active))
+                }
+              />
+            )}
+            {gallery.length > 1 && (
+              <div className="qv-thumbs">
+                {gallery.map((url, index) => (
+                  <button
+                    key={`${index}-${url.slice(0, 24)}`}
+                    type="button"
+                    className={
+                      index === active ? 'qv-thumb active' : 'qv-thumb'
+                    }
+                    onClick={() => setActive(index)}
+                    aria-label={`Photo ${index + 1}`}
+                  >
+                    <img src={url} alt="" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="qv-details">
+            <h3>{product.name}</h3>
+            <span className="price">${product.price.toFixed(2)}</span>
+            <p className="product-desc">{product.description}</p>
+            <div className="product-meta">
+              {product.stockQuantity === 0 ? (
+                <span className="stock out">Out of stock</span>
+              ) : product.stockQuantity <= LOW_STOCK ? (
+                <span className="badge badge-low">
+                  Only {product.stockQuantity} left
+                </span>
+              ) : (
+                <span className="stock">
+                  {product.stockQuantity} in stock
+                </span>
+              )}
+              <span className="muted">
+                Seller: {product.sellerUsername ?? '—'}
+              </span>
+            </div>
+            {role === 'CUSTOMER' && (
+              <div className="product-action">
+                {cartItem ? (
+                  <div className="stepper">
+                    <button
+                      className="secondary"
+                      onClick={() =>
+                        setQuantity(cartItem.productId, cartItem.quantity - 1)
+                      }
+                    >
+                      −
+                    </button>
+                    <span className="qty">{cartItem.quantity}</span>
+                    <button
+                      className="secondary"
+                      disabled={cartItem.quantity >= product.stockQuantity}
+                      onClick={() =>
+                        setQuantity(cartItem.productId, cartItem.quantity + 1)
+                      }
+                    >
+                      +
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    className="add-btn"
+                    disabled={product.stockQuantity === 0}
+                    onClick={() => add(product)}
+                  >
+                    {product.stockQuantity === 0
+                      ? 'Out of stock'
+                      : 'Add to cart'}
+                  </button>
+                )}
+              </div>
+            )}
+            <button type="button" className="secondary" onClick={onClose}>
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function ProductsPage() {
   const { role } = useAuth()
   const { add, items, setQuantity } = useCart()
@@ -79,6 +203,7 @@ export default function ProductsPage() {
   const [form, setForm] = useState<Product>(EMPTY)
   const [newImageUrl, setNewImageUrl] = useState('')
   const [editorOpen, setEditorOpen] = useState(false)
+  const [quickView, setQuickView] = useState<Product | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -393,9 +518,21 @@ export default function ProductsPage() {
                 }
                 key={product.id}
               >
-                <ProductImage product={product} variant="card" />
+                <div
+                  className="qv-open"
+                  onClick={() => setQuickView(product)}
+                  title="Quick view"
+                >
+                  <ProductImage product={product} variant="card" />
+                </div>
                 <div className="product-card-top">
-                  <h3>{product.name}</h3>
+                  <h3
+                    className="qv-open"
+                    onClick={() => setQuickView(product)}
+                    title="Quick view"
+                  >
+                    {product.name}
+                  </h3>
                   <span className="price">${product.price.toFixed(2)}</span>
                 </div>
                 <p className="muted product-desc">{product.description}</p>
@@ -486,7 +623,13 @@ export default function ProductsPage() {
                 <td>
                   <ProductImage product={product} variant="thumb" />
                 </td>
-                <td>{product.name}</td>
+                <td
+                  className="qv-open"
+                  onClick={() => setQuickView(product)}
+                  title="Quick view"
+                >
+                  {product.name}
+                </td>
                 <td>{product.description}</td>
                 <td>${product.price.toFixed(2)}</td>
                 <td>
@@ -596,6 +739,12 @@ export default function ProductsPage() {
       )}
       {role === 'ADMIN' && (
         <p className="muted">Admins see every seller's products.</p>
+      )}
+      {quickView && (
+        <QuickViewModal
+          product={quickView}
+          onClose={() => setQuickView(null)}
+        />
       )}
     </section>
   )
