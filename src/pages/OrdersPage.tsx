@@ -73,6 +73,10 @@ export default function OrdersPage() {
     return products.find((p) => p.id === id)?.name ?? `#${id}`
   }
 
+  function productImage(id: number): string | null {
+    return products.find((p) => p.id === id)?.imageUrl ?? null
+  }
+
   async function handleCreate(event: FormEvent) {
     event.preventDefault()
     setError(null)
@@ -265,9 +269,23 @@ export default function OrdersPage() {
                 </td>
                 <td>
                   {order.items.map((item) => (
-                    <div key={item.id ?? item.productId}>
-                      {productName(item.productId)} × {item.quantity} @ $
-                      {(item.priceAtPurchase ?? 0).toFixed(2)}
+                    <div
+                      key={item.id ?? item.productId}
+                      className="cell-with-thumb order-line"
+                    >
+                      {productImage(item.productId) ? (
+                        <img
+                          className="thumb-sm"
+                          src={productImage(item.productId) ?? ''}
+                          alt=""
+                        />
+                      ) : (
+                        <span className="thumb-sm thumb-fallback">🛍️</span>
+                      )}
+                      <span>
+                        {productName(item.productId)} × {item.quantity} @ $
+                        {(item.priceAtPurchase ?? 0).toFixed(2)}
+                      </span>
                     </div>
                   ))}
                 </td>

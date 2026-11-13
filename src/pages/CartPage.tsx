@@ -79,7 +79,20 @@ export default function CartPage({
             <tbody>
               {items.map((item) => (
                 <tr key={item.productId}>
-                  <td>{item.name}</td>
+                  <td>
+                    <div className="cell-with-thumb">
+                      {item.imageUrl ? (
+                        <img
+                          className="thumb-sm"
+                          src={item.imageUrl}
+                          alt=""
+                        />
+                      ) : (
+                        <span className="thumb-sm thumb-fallback">🛍️</span>
+                      )}
+                      <span>{item.name}</span>
+                    </div>
+                  </td>
                   <td>${item.price.toFixed(2)}</td>
                   <td>
                     <input

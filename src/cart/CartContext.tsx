@@ -12,6 +12,8 @@ import type { Product } from '../api/types'
 export interface CartItem {
   productId: number
   name: string
+  /** Cover photo, shown as a small thumbnail next to the name. */
+  imageUrl: string | null
   price: number
   quantity: number
   /** Stock available when the item was added; the cart caps quantity here,
@@ -37,7 +39,11 @@ function loadCart(): CartItem[] {
     const raw = localStorage.getItem(STORAGE_KEY)
     const items = raw ? (JSON.parse(raw) as CartItem[]) : []
     // Carts saved before items carried stock have no cap until re-added.
-    return items.map((item) => ({ ...item, stock: item.stock ?? 0 }))
+    return items.map((item) => ({
+      ...item,
+      stock: item.stock ?? 0,
+      imageUrl: item.imageUrl ?? null,
+    }))
   } catch {
     return []
   }
@@ -60,6 +66,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           item.productId === productId
             ? {
                 ...item,
+                imageUrl: product.imageUrl,
                 stock: product.stockQuantity,
                 quantity: Math.min(
                   item.quantity + 1,
@@ -74,6 +81,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         {
           productId,
           name: product.name,
+          imageUrl: product.imageUrl,
           price: product.price,
           quantity: 1,
           stock: product.stockQuantity,

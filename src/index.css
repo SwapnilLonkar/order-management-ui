@@ -1259,3 +1259,31 @@ tbody tr:hover {
   background: linear-gradient(90deg, #2368a0, #00aae7);
   border-radius: 4px;
 }
+
+/* Small product thumbnails next to names (cart, orders) */
+.cell-with-thumb {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.thumb-sm {
+  width: 34px;
+  height: 34px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex: none;
+  display: block;
+}
+
+.thumb-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e8f2fa, #f4f8fb);
+  font-size: 1rem;
+}
+
+.order-line {
+  padding: 0.15rem 0;
+}
