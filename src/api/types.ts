@@ -7,6 +7,8 @@ export interface Product {
   name: string
   description: string | null
   imageUrl: string | null
+  /** Full ordered photo gallery, cover first (the cover is also imageUrl). */
+  imageUrls: string[]
   price: number
   stockQuantity: number
   sellerId: number | null

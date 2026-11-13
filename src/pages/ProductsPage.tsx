@@ -19,10 +19,19 @@ const EMPTY: Product = {
   name: '',
   description: '',
   imageUrl: null,
+  imageUrls: [],
   price: 0,
   stockQuantity: 0,
   sellerId: null,
   sellerUsername: null,
+}
+
+/** A product's gallery: imageUrls when present, else its single photo. */
+function galleryOf(product: Product): string[] {
+  if (product.imageUrls && product.imageUrls.length > 0) {
+    return product.imageUrls
+  }
+  return product.imageUrl ? [product.imageUrl] : []
 }
 
 /** At or below this stock level a product gets an "Only X left" badge. */
@@ -68,6 +77,7 @@ export default function ProductsPage() {
     'featured',
   )
   const [form, setForm] = useState<Product>(EMPTY)
+  const [newImageUrl, setNewImageUrl] = useState('')
   const [editorOpen, setEditorOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -105,10 +115,34 @@ export default function ProductsPage() {
       }
     })
 
+  /** Appends a photo to the form's gallery (first photo is the cover). */
+  function appendImage(url: string) {
+    setForm((f) => {
+      const gallery = galleryOf(f)
+      if (!url || gallery.includes(url)) return f
+      const next = [...gallery, url]
+      return { ...f, imageUrls: next, imageUrl: next[0] }
+    })
+  }
+
+  function removeImage(index: number) {
+    setForm((f) => {
+      const next = galleryOf(f).filter((_, i) => i !== index)
+      return { ...f, imageUrls: next, imageUrl: next[0] ?? null }
+    })
+  }
+
+  function addImageUrl() {
+    const url = newImageUrl.trim()
+    if (!url) return
+    appendImage(url)
+    setNewImageUrl('')
+  }
+
   /**
-   * Reads a picked image file into the form as a data URL (which the
-   * backend stores in the product's imageUrl). Photos larger than 1000px
-   * are downscaled on a canvas first so the stored value stays small.
+   * Reads a picked image file and appends it to the form's gallery as a
+   * data URL. Photos larger than 1000px are downscaled on a canvas first
+   * so the stored value stays small.
    */
   function handleImageFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -120,7 +154,7 @@ export default function ProductsPage() {
       img.onload = () => {
         const max = 1000
         if (img.width <= max && img.height <= max) {
-          setForm((f) => ({ ...f, imageUrl: dataUrl }))
+          appendImage(dataUrl)
           return
         }
         const scale = max / Math.max(img.width, img.height)
@@ -128,24 +162,28 @@ export default function ProductsPage() {
         canvas.width = Math.round(img.width * scale)
         canvas.height = Math.round(img.height * scale)
         canvas.getContext('2d')?.drawImage(img, 0, 0, canvas.width, canvas.height)
-        setForm((f) => ({
-          ...f,
-          imageUrl: canvas.toDataURL('image/jpeg', 0.85),
-        }))
+        appendImage(canvas.toDataURL('image/jpeg', 0.85))
       }
       img.src = dataUrl
     }
     reader.readAsDataURL(file)
+    event.target.value = ''
   }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setError(null)
     try {
+      const gallery = galleryOf(form)
+      const payload: Product = {
+        ...form,
+        imageUrls: gallery,
+        imageUrl: gallery[0] ?? null,
+      }
       if (form.id) {
-        await updateProduct(form.id, form)
+        await updateProduct(form.id, payload)
       } else {
-        await createProduct(form)
+        await createProduct(payload)
       }
       setForm(EMPTY)
       setEditorOpen(false)
@@ -178,6 +216,7 @@ export default function ProductsPage() {
           <button
             onClick={() => {
               setForm(EMPTY)
+              setNewImageUrl('')
               setError(null)
               setEditorOpen(true)
             }}
@@ -214,40 +253,53 @@ export default function ProductsPage() {
                     }
                   />
                 </label>
-                <label>
-                  Image URL
-                  <input
-                    value={
-                      form.imageUrl?.startsWith('data:')
-                        ? ''
-                        : (form.imageUrl ?? '')
-                    }
-                    onChange={(e) =>
-                      setForm({ ...form, imageUrl: e.target.value })
-                    }
-                    placeholder="https://…"
-                  />
-                </label>
-                <label>
-                  Upload image
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageFile}
-                  />
-                </label>
-                {form.imageUrl && (
-                  <div className="img-preview">
-                    <img src={form.imageUrl} alt="Product preview" />
+                <div className="gallery-editor">
+                  <span className="gallery-label">
+                    Photos — the first is the cover
+                  </span>
+                  {galleryOf(form).length > 0 && (
+                    <div className="gallery-list">
+                      {galleryOf(form).map((url, index) => (
+                        <div className="gallery-item" key={`${index}-${url.slice(0, 24)}`}>
+                          <img src={url} alt={`Photo ${index + 1}`} />
+                          {index === 0 && (
+                            <span className="cover-tag">Cover</span>
+                          )}
+                          <button
+                            type="button"
+                            className="secondary"
+                            onClick={() => removeImage(index)}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="row">
+                    <input
+                      value={newImageUrl}
+                      onChange={(e) => setNewImageUrl(e.target.value)}
+                      placeholder="Paste a photo URL…"
+                      aria-label="Photo URL"
+                    />
                     <button
                       type="button"
                       className="secondary"
-                      onClick={() => setForm({ ...form, imageUrl: null })}
+                      onClick={addImageUrl}
                     >
-                      Remove image
+                      Add photo
                     </button>
                   </div>
-                )}
+                  <label>
+                    Upload image
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageFile}
+                    />
+                  </label>
+                </div>
                 <label>
                   Price
                   <input
@@ -461,7 +513,11 @@ export default function ProductsPage() {
                     <button
                       className="secondary"
                       onClick={() => {
-                        setForm(product)
+                        setForm({
+                          ...product,
+                          imageUrls: galleryOf(product),
+                        })
+                        setNewImageUrl('')
                         setError(null)
                         setEditorOpen(true)
                       }}
